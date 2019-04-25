@@ -1,30 +1,51 @@
 <template>
   <div id="app">
-
-    <img alt="Nasa logo" src="./assets/logo.png">
-    <HomePage msg="Welcome to Nasa"/>
-    
+    <AsteroidGrid @remove="remove" :asteroids="asteroids" header="Near-Earth Asteroids"></AsteroidGrid>
   </div>
 </template>
 
 <script>
-import HomePage from './components/homepage.vue'
 
+import AsteroidGrid from "./components/AsteroidGrid.vue";
+
+import axios from "axios";
 export default {
-  name: 'app',
+  name: "app",
   components: {
-    HomePage
+    AsteroidGrid
+  },
+  data() {
+    return {
+      asteroids: []
+    };
+  },
+  created: function() {
+    this.fetchAsteroids();
+
+  },
+  methods: {
+    fetchAsteroids: function() {
+      var apiKey = "Y437uIoUfia17J5XjH1ycaxdrirmmyfMKHmZUj3d";
+      var url = "https://api.nasa.gov/neo/rest/v1/neo/browse?api_key=" + apiKey;
+      axios.get(url).then(res => {
+        for (let i = 0; i < res.data.near_earth_objects.length; i++) {
+          if (res.data.near_earth_objects[i].close_approach_data.length) {
+            this.asteroids.push(res.data.near_earth_objects[i]);
+          }
+        }
+
+        this.asteroids = this.asteroids.slice(0, 10);
+      });
+    },
+    remove: function(index) {
+      this.asteroids.splice(index, 1);
+    }
   }
-}
+};
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+[v-cloak] {
+  display: none;
 }
 </style>
